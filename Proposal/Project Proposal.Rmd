@@ -1,0 +1,51 @@
+---
+title: "Project Proposal"
+author: "STOR 320.01 Group 8"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+# Project Roles
+
+- **Creator:** Isabelle Raad
+- **Interpreter 1:** Kritan Bhurtyal
+- **Interpreter 2:** Tara Hinton
+- **Orator 1:** Andrew Dragen
+- **Orator 2:** Abby Egnatz
+- **Deliverer:** Fengxing (Dadria) Chen
+
+# Dataset
+
+[OpenFEMA Dataset: Individuals and Households Program - Valid Registrations - v1](https://www.fema.gov/openfema-data-page/individuals-and-households-program-valid-registrations-v1)
+
+This dataset contains 22 years of data. In order to better manage the data, we will instead create three smaller subsets that will be used in our analyses.
+
+1. Randomly select 100,000 IA applications per year, resulting in a 2,400,000 item dataset.
+
+2. Select IA applications with disaster numbers matching Hurricane Florence, Hurricane Katrina, Baja California Earthquake (2010), 2014 Northwest Territories fires, and 2011 Super Outbreak. The two hurricanes were chosen because they were famous hurricanes from different decades. For diversity of disaster type, we have also chosen an earthquake, a fire, and a tornado.
+
+3. Select IA applications originating from Fayetteville, NC. We chose Fayetteville because it is the American city most at risk of natural disaster, with a natural disaster index of 180, according to [USA Today](https://www.usatoday.com/story/money/business/2015/09/19/24-7-wall-st-cities-dangerous-natural-disasters/32503999/). This choice is also interesting from the point of view of students of a public North Carolina university.
+
+Each initial question will be followed by a number indicating which dataset we plan to answer the question with.
+
+# Initial Questions
+
+- **Question 1:** What is the best model to predict aid received? Which variables are of most influence in this model? What other variables are these influential variables highly correlated with? (1)
+- **Question 2:** How has the ratio of repaired to replaced damage amounts changed over time? (1)
+- **Question 3:** After adjusting for inflation, has the amount of aid received changed over time? If so, in what way? (1)
+- **Question 4:** Is there statistically significant evidence that the aid received by homes that have experienced the same disaster is correlated with the median home value of the county in which they are located, web scraped from [the National Association of Realtors](https://www.nar.realtor/research-and-statistics/housing-statistics/county-median-home-prices-and-monthly-mortgage-payment)? (2)
+- **Question 5:** Are homes that have experienced more flood damage more likely to have had flood insurance? Follow-up question: Is income a better predictor of flood insurance than the amount of flood damage a home experiences? (1)
+- **Question 6:** Are different areas in Fayetteville more likely to experience certain types of disasters? (3) It may be helpful to produce a map in GIS or python demonstrating this effect.
+- **Question 7:** Are certain age groups more severely financially impacted by disaster damage? (1)
+- **Question 8:** How has the frequency of disasters in Fayetteville changed over time? How are these changes observed among the different types of disasters? (3)
+- **Question 9:** Is there a relationship between the median neighborhood home value (found by web scraping from [the National Association of Realtors](https://www.nar.realtor/research-and-statistics/housing-statistics/county-median-home-prices-and-monthly-mortgage-payment) by by county) and reported need for food, shelter, and emergency items assistance? (1)
+- **Question 10:** Is there a difference in aid received by small businesses and residential dwellings? (1)
+- **Question 11:** What does the pattern of disaster damage look like for our five selected events? (2) It may be helpful to produce a map in GIS or python demonstrating this effect.
+- **Question 12:** Is there a statistically significant difference between damages reported by property renters and owners? (1) Follow-up question: Does this trend hold for all types of damage (i.e. “real” property, “personal” property, foundational)?
+
+Note: Aid received is measured by summing variables ihpAmount and fipAmount. Disaster damage is measured by summing variables rpfvl and ppfvl.
