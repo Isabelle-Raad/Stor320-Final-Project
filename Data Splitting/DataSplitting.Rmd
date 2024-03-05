@@ -28,7 +28,7 @@ fema_data <- read_csv(
 ```
 
 ```{r}
-kbl(cbind(fema_data, fema_data)) %>%
+kbl(cbind(fema_data[1:10,], fema_data[1:10,])) %>%
   kable_paper() %>%
   scroll_box(width = "100%", height = "200px")
 ```
@@ -78,7 +78,7 @@ data2023 <- filter(fema_data, year==2023)
 Let's look at one dataset to ensure that it looks the way we anticipate.
 
 ```{r}
-kbl(cbind(data2002, data2002)) %>%
+kbl(cbind(data2002[1:10,], data2002[1:10,])) %>%
   kable_paper() %>%
   scroll_box(width = "100%", height = "200px")
 ```
@@ -120,7 +120,7 @@ sample2023 <- smpl50000(data2023)
 Let's look at one dataset to ensure that it looks the way we anticipate.
 
 ```{r}
-kbl(cbind(sample2002, sample2002)) %>%
+kbl(cbind(sample2002[1:10,], sample2002[1:10,])) %>%
   kable_paper() %>%
   scroll_box(width = "100%", height = "200px")
 ```
@@ -134,7 +134,7 @@ data1 <- rbind(sample2002, sample2003, sample2004, sample2005, sample2006,
                sample2017, sample2018, sample2019, sample2020, sample2021,
                sample2022, sample2023)
 
-kbl(cbind(data1, data1)) %>%
+kbl(cbind(data1[1:10,], data1[1:10,])) %>%
   kable_paper() %>%
   scroll_box(width = "100%", height = "200px")
 ```
@@ -157,7 +157,7 @@ Now that we have the disaster numbers associated with each disaster we are inter
 data2 <- filter(fema_data, disasterNumber %in%
                   c(4393,4394,4401,1602,1603,1604,1605,1911,4558,4569,4117))
 
-kbl(cbind(data2, data2)) %>%
+kbl(cbind(data2[1:10,], data2[1:10,])) %>%
   kable_paper() %>%
   scroll_box(width = "100%", height = "200px")
 ```
@@ -177,7 +177,7 @@ This dataset will require a filtering process similar to Dataset 2. Instead of c
 ```{r}
 data3 <- filter(fema_data, damagedStateAbbreviation == 'NC' & damagedCity == 'FAYETTEVILLE')
 
-kbl(cbind(data3, data3)) %>%
+kbl(cbind(data3[1:10,], data3[1:10,])) %>%
   kable_paper() %>%
   scroll_box(width = "100%", height = "200px")
 ```
