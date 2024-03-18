@@ -1,16 +1,31 @@
 ---
-title: "Data Splitting"
-author: "IZ Raad"
+title: "Data Cleaning"
+author: "Izzy Raad"
 date: "2024-03-04"
 output: html_document
 ---
 
-```{r, include=FALSE}
+```{r, include=FALSE, message=FALSE, warning=FALSE}
 library(tidyverse)
-library(kableExtra) 
+library(kableExtra)
+library(tidyr)
+library(dplyr)
+library(rvest)
+library(curl)
 ```
 
-# Data Splitting
+```{r, include=FALSE, message=FALSE, warning=FALSE}
+fema_data <- read_csv(
+  "C:\\Users\\isabe\\OneDrive\\Desktop\\Stor_320\\Data_Splitting\\IndividualsAndHouseholdsProgramValidRegistrations.csv")
+data1 <- read_csv(
+  "C:\\Users\\isabe\\OneDrive\\Desktop\\Stor_320\\Data_Splitting\\data1.csv")
+data2 <- read_csv(
+  "C:\\Users\\isabe\\OneDrive\\Desktop\\Stor_320\\Data_Splitting\\data2.csv")
+data3 <- read_csv(
+  "C:\\Users\\isabe\\OneDrive\\Desktop\\Stor_320\\Data_Splitting\\data3.csv")
+IAdata1 <- read_csv(
+  "C:\\Users\\isabe\\OneDrive\\Desktop\\Stor_320\\Data_Splitting\\IAdata1.csv")
+```
 
 We are working with the [OpenFEMA Dataset: Individuals and Households Program](https://www.fema.gov/openfema-data-page/individuals-and-households-program-valid-registrations-v1) dataset, which has 71 variables and 20,967,572 observations. If order to better work with this dataset, we will split it into three smaller datasets:
 
@@ -20,17 +35,16 @@ We are working with the [OpenFEMA Dataset: Individuals and Households Program](h
 
 [Dataset 3](#3): Select IA applications originating from Fayetteville, NC
 
-## Loading the Dataset
+After we split our FEMA dataset into three smaller datasets, we must [adjust monetary variables for inflation](#adjinf).
 
-```{r, message=FALSE, warning=FALSE, output=FALSE, results='hide'}
-fema_data <- read_csv(
-  "C:\\Users\\isabe\\OneDrive\\Desktop\\Stor_320\\Data_Splitting\\IndividualsAndHouseholdsProgramValidRegistrations.csv")
-```
+# Data Splitting
+
+Before we split this into three datasets, let's first get a sense of what our original data looks like.
 
 ```{r}
-kbl(cbind(fema_data[1:10,], fema_data[1:10,])) %>%
-  kable_paper() %>%
-  scroll_box(width = "100%", height = "200px")
+kbl(fema_data[1:15,]) %>%
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "center") %>%
+  scroll_box(height = "300px")
 ```
 
 ## Dataset 1: Randomly Select 50,000 IA Applications per Year {#1}
@@ -50,37 +64,47 @@ str(fema_data$year)
 
 We need to split out dataset into 22 datasets: one for each year covered in our original dataset. These will be easier to work with.
 
-```{r}
-data2002 <- filter(fema_data, year==2002)
-data2003 <- filter(fema_data, year==2003)
-data2004 <- filter(fema_data, year==2004)
-data2005 <- filter(fema_data, year==2005)
-data2006 <- filter(fema_data, year==2006)
-data2007 <- filter(fema_data, year==2007)
-data2008 <- filter(fema_data, year==2008)
-data2009 <- filter(fema_data, year==2009)
-data2010 <- filter(fema_data, year==2010)
-data2011 <- filter(fema_data, year==2011)
-data2012 <- filter(fema_data, year==2012)
-data2013 <- filter(fema_data, year==2013)
-data2014 <- filter(fema_data, year==2014)
-data2015 <- filter(fema_data, year==2015)
-data2016 <- filter(fema_data, year==2016)
-data2017 <- filter(fema_data, year==2017)
-data2018 <- filter(fema_data, year==2018)
-data2019 <- filter(fema_data, year==2019)
-data2020 <- filter(fema_data, year==2020)
-data2021 <- filter(fema_data, year==2021)
-data2022 <- filter(fema_data, year==2022)
-data2023 <- filter(fema_data, year==2023)
+```{r, include=FALSE}
+newname = paste('data', 2002, sep="")
+assign(newname, filter(fema_data, year==2002))
+```
+
+```{r, eval=FALSE}
+for (yr in 2002:2023){
+  newname = paste('data', yr, sep="")
+  assign(newname, filter(fema_data, year==yr))
+}
+
+#data2002 <- filter(fema_data, year==2002)
+#data2003 <- filter(fema_data, year==2003)
+#data2004 <- filter(fema_data, year==2004)
+#data2005 <- filter(fema_data, year==2005)
+#data2006 <- filter(fema_data, year==2006)
+#data2007 <- filter(fema_data, year==2007)
+#data2008 <- filter(fema_data, year==2008)
+#data2009 <- filter(fema_data, year==2009)
+#data2010 <- filter(fema_data, year==2010)
+#data2011 <- filter(fema_data, year==2011)
+#data2012 <- filter(fema_data, year==2012)
+#data2013 <- filter(fema_data, year==2013)
+#data2014 <- filter(fema_data, year==2014)
+#data2015 <- filter(fema_data, year==2015)
+#data2016 <- filter(fema_data, year==2016)
+#data2017 <- filter(fema_data, year==2017)
+#data2018 <- filter(fema_data, year==2018)
+#data2019 <- filter(fema_data, year==2019)
+#data2020 <- filter(fema_data, year==2020)
+#data2021 <- filter(fema_data, year==2021)
+#data2022 <- filter(fema_data, year==2022)
+#data2023 <- filter(fema_data, year==2023)
 ```
 
 Let's look at one dataset to ensure that it looks the way we anticipate.
 
 ```{r}
-kbl(cbind(data2002[1:10,], data2002[1:10,])) %>%
-  kable_paper() %>%
-  scroll_box(width = "100%", height = "200px")
+kbl(data2002[1:15,]) %>%
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "center") %>%
+  scroll_box(height = "300px")
 ```
 
 Now that we have our datasets split into each year, we may now randomly select 50,000 IA Applications from each year.
@@ -92,51 +116,67 @@ smpl50000 <- function(dataset){
   smplindex = sample(1:nrow(dataset), 50000, replace=FALSE)
   return(dataset[smplindex,])
 }
+```
 
-sample2002 <- smpl50000(data2002)
-sample2003 <- smpl50000(data2003)
-sample2004 <- smpl50000(data2004)
-sample2005 <- smpl50000(data2005)
-sample2006 <- smpl50000(data2006)
-sample2007 <- smpl50000(data2007)
-sample2008 <- smpl50000(data2008)
-sample2009 <- smpl50000(data2009)
-sample2010 <- smpl50000(data2010)
-sample2011 <- smpl50000(data2011)
-sample2012 <- smpl50000(data2012)
-sample2013 <- smpl50000(data2013)
-sample2014 <- smpl50000(data2014)
-sample2015 <- smpl50000(data2015)
-sample2016 <- smpl50000(data2016)
-sample2017 <- smpl50000(data2017)
-sample2018 <- smpl50000(data2018)
-sample2019 <- smpl50000(data2019)
-sample2020 <- smpl50000(data2020)
-sample2021 <- smpl50000(data2021)
-sample2022 <- smpl50000(data2022)
-sample2023 <- smpl50000(data2023)
+```{r, include=FALSE}
+newname = paste('sample', 2002, sep="")
+filtered <- filter(fema_data, year==2002)
+assign(newname, smpl50000(filtered))
+```
+
+```{r, eval=FALSE}
+for (yr in 2002:2023){
+  newname = paste('sample', yr, sep="")
+  filtered <- filter(fema_data, year==yr)
+  assign(newname, smpl50000(filtered))
+}
+
+#sample2002 <- smpl50000(data2002)
+#sample2003 <- smpl50000(data2003)
+#sample2004 <- smpl50000(data2004)
+#sample2005 <- smpl50000(data2005)
+#sample2006 <- smpl50000(data2006)
+#sample2007 <- smpl50000(data2007)
+#sample2008 <- smpl50000(data2008)
+#sample2009 <- smpl50000(data2009)
+#sample2010 <- smpl50000(data2010)
+#sample2011 <- smpl50000(data2011)
+#sample2012 <- smpl50000(data2012)
+#sample2013 <- smpl50000(data2013)
+#sample2014 <- smpl50000(data2014)
+#sample2015 <- smpl50000(data2015)
+#sample2016 <- smpl50000(data2016)
+#sample2017 <- smpl50000(data2017)
+#sample2018 <- smpl50000(data2018)
+#sample2019 <- smpl50000(data2019)
+#sample2020 <- smpl50000(data2020)
+#sample2021 <- smpl50000(data2021)
+#sample2022 <- smpl50000(data2022)
+#sample2023 <- smpl50000(data2023)
 ```
 
 Let's look at one dataset to ensure that it looks the way we anticipate.
 
 ```{r}
-kbl(cbind(sample2002[1:10,], sample2002[1:10,])) %>%
-  kable_paper() %>%
-  scroll_box(width = "100%", height = "200px")
+kbl(sample2002[1:15,]) %>%
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "center") %>%
+  scroll_box(height = "300px")
 ```
 
 Now that we have 22 datasets of length 50,000, we may combine them all into one dataset
 
-```{r}
+```{r, eval=FALSE}
 data1 <- rbind(sample2002, sample2003, sample2004, sample2005, sample2006,
                sample2007, sample2008, sample2009, sample2010, sample2011,
                sample2012, sample2013, sample2014, sample2015, sample2016,
                sample2017, sample2018, sample2019, sample2020, sample2021,
                sample2022, sample2023)
+```
 
-kbl(cbind(data1[1:10,], data1[1:10,])) %>%
-  kable_paper() %>%
-  scroll_box(width = "100%", height = "200px")
+```{r}
+kbl(data1[1:15,]) %>%
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "center") %>%
+  scroll_box(height = "300px")
 ```
 
 The creation of dataset 1 is complete.
@@ -153,13 +193,15 @@ Our five selected disasters are Hurricane Florence, Hurricane Katrina, Baja Cali
 
 Now that we have the disaster numbers associated with each disaster we are interested in, we must filter our original dataset.
 
-```{r}
+```{r, eval=FALSE}
 data2 <- filter(fema_data, disasterNumber %in%
                   c(4393,4394,4401,1602,1603,1604,1605,1911,4558,4569,4117))
+```
 
-kbl(cbind(data2[1:10,], data2[1:10,])) %>%
-  kable_paper() %>%
-  scroll_box(width = "100%", height = "200px")
+```{r}
+kbl(data2[1:15,]) %>%
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "center") %>%
+  scroll_box(height = "300px")
 ```
 
 The creation of dataset 2 is complete.
@@ -174,12 +216,14 @@ write.csv(data2,
 
 This dataset will require a filtering process similar to Dataset 2. Instead of choosing observations with specific disaster numbers, we will choose observations whose city is Fayetteville, NC.
 
-```{r}
+```{r, eval=FALSE}
 data3 <- filter(fema_data, damagedStateAbbreviation == 'NC' & damagedCity == 'FAYETTEVILLE')
+```
 
-kbl(cbind(data3[1:10,], data3[1:10,])) %>%
-  kable_paper() %>%
-  scroll_box(width = "100%", height = "200px")
+```{r}
+kbl(data3[1:15,]) %>%
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "center") %>%
+  scroll_box(height = "300px")
 ```
 
 The creation of dataset 3 is complete.
@@ -189,3 +233,110 @@ write.csv(data3,
           "C:\\Users\\isabe\\OneDrive\\Desktop\\Stor_320\\Data_Splitting\\data3.csv",
           row.names=FALSE)
 ```
+
+# Adjusting for Inflation {#adjinf}
+
+First, let's web scrape yearly consumer price indexes (CPI) from [the Federal Reserve Bank of Minneapolis](https://www.minneapolisfed.org/about-us/monetary-policy/inflation-calculator/consumer-price-index-1913-).
+
+```{r}
+URL.CPI="https://www.minneapolisfed.org/about-us/monetary-policy/inflation-calculator/consumer-price-index-1913-"
+
+CPIdf = URL.CPI %>% read_html() %>%
+  html_table(fill=TRUE) %>% .[[1]] %>%
+  select("year"="Year", "CPI" = "Annual Average CPI(-U)")
+
+kbl(CPIdf) %>%
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "center") %>%
+  scroll_box(height = "300px")
+```
+
+Next we will create a function to adjust for inflation. Our datasets end in 2023, we should output a dollar amount adjusted to 2023. To adjust for inflation, we use the following formula:
+$$P_{1} = P_{0}(\frac{CPI_{1}}{CPI_{0}})$$
+
+```{r}
+CPI2023 = filter(CPIdf, year == 2023)[[1, 2]]
+
+price2023 <- function(price, yr){
+  CPI = filter(CPIdf, year == yr)[[1, 2]]
+  price2023 = price*CPI2023/CPI
+  return(price2023)
+}
+```
+
+Monetary variables for our three datasets include haAmount, ihpAmount, fipAmount, onaAmount, rpfvl, ppfvl, floodDamageAmount, foundationDamageAmount, roofDamageAmount, rentalAssistanceAmount, repairAmount, replacementAmount, and personalPropertyAmount. Let's make a function that takes in a column and outputs an inflation adjusted column.
+
+```{r}
+monetary <- c('haAmount', 'ihpAmount', 'fipAmount', 'onaAmount', 'rpfvl', 'ppfvl',
+               'floodDamageAmount', 'foundationDamageAmount', 'roofDamageAmount',
+               'rentalAssistanceAmount', 'repairAmount', 'replacementAmount',
+               'personalPropertyAmount')
+
+IAdata <- function(data){
+  idlist = data$id
+  yearlist = data$year
+  IAdata = data
+  for (col in monetary){
+    colmn = data[[col]]
+    newlist = c()
+    for (i in 1:nrow(data)){
+      newlist = c(newlist, price2023(colmn[i], yearlist[i]))
+    }
+    newname = paste('IA', col, sep="")
+    newdf = as.data.frame(newlist)
+    colnames(newdf) <- c(newname)
+    newdf$id <- idlist
+    IAdata = inner_join(IAdata, newdf, by='id')
+  }
+  return(IAdata)
+}
+```
+
+Let us now apply this function to our three datasets.
+
+```{r, eval=FALSE}
+IAdata1 <- IAdata(data1)
+IAdata2 <- IAdata(data2)
+IAdata3 <- IAdata(data3)
+```
+
+Now, we check one of these new datasets to ensure that it is in the proper format.
+
+```{r}
+kbl(IAdata1[1:15,]) %>%
+  kable_styling(bootstrap_options = "striped", full_width = F, position = "center") %>%
+  scroll_box(height = "300px")
+```
+
+We have now adjusted all monetary variables for inflation.
+
+```{r, eval=FALSE, include=FALSE}
+# Saving new datasets
+
+write.csv(IAdata1,
+          "C:\\Users\\isabe\\OneDrive\\Desktop\\Stor_320\\Data_Splitting\\IAdata1.csv",
+          row.names=FALSE)
+write.csv(IAdata2,
+          "C:\\Users\\isabe\\OneDrive\\Desktop\\Stor_320\\Data_Splitting\\IAdata2.csv",
+          row.names=FALSE)
+write.csv(IAdata3,
+          "C:\\Users\\isabe\\OneDrive\\Desktop\\Stor_320\\Data_Splitting\\IAdata3.csv",
+          row.names=FALSE)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
